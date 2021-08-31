@@ -23,7 +23,7 @@
         that:
           - tenant != ""
         fail_msg: "'tenant' does not exist"
-        success_msg: "attempting to remove tenant: 'tenant'"
+        success_msg: "attempting to remove tenant: {{ tenant }}"
 
     - name: Remove one tenant - AS3
       bigip_as3_deploy:
