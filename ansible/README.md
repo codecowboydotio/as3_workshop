@@ -8,6 +8,8 @@ This collection uses the AS3 modules to add a simple configuration and remove it
 2. Install AS3 on the BIG-IP
 3. Install an ansible node with the F5 ansible collection
 
+I have a terraform example here: (https://github.com/codecowboydotio/terraform/tree/main/ansible) that will install an ansible server and a bigip for you.
+
 ### Directory structure
 Within thei section of the repo there are two directories:
 
@@ -109,7 +111,7 @@ The removal playbook is similar in nature, in that it still has the variables to
 
   # Connection Info
   vars:
-    ansible_host: 3.24.162.144
+    ansible_host: x.x.x.x
     ansible_user: admin
     ansible_httpapi_password: password
     ansible_httpapi_port: 443
