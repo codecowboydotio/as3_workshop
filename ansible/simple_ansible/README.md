@@ -10,12 +10,6 @@ This collection uses the AS3 modules to add a simple configuration and remove it
 
 I have a terraform example here: (https://github.com/codecowboydotio/terraform/tree/main/ansible) that will install an ansible server and a bigip for you.
 
-### Directory structure
-Within thei section of the repo there are two directories:
-
-- simple_ansible: This is a simple example of deploying a static AS3 configuration to a BIG-IP.
-- paramter_ansile: This is the same simple example but shows how to use paramters to pass variables to the playbook
-
 ### Playbooks
 There are two playbooks here with a very simple use case:
 
