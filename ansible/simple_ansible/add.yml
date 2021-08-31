@@ -6,7 +6,7 @@
 
   # Connection Info
   vars:
-    ansible_host: 3.24.162.144
+    ansible_host: x.x.x.x
     ansible_user: admin
     ansible_httpapi_password: password
     ansible_httpapi_port: 443
@@ -18,6 +18,6 @@
 
     - name: Deploy or Update AS3
       f5networks.f5_bigip.bigip_as3_deploy:
-          content: "{{ lookup('file', 'as3.json') }}"
+          content: "{{ lookup('file', 'as3_simple.json') }}"
       tags: [ deploy ]
 
