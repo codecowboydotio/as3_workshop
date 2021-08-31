@@ -14,7 +14,14 @@
     ansible_httpapi_use_ssl: yes
     ansible_httpapi_validate_certs: no
 
+    VIP_ADDRESS: 1.1.1.1
+
   tasks:
+
+    - name: Update AS3 template
+      template:
+        src: as3_simple.j2
+        dest: as3_simple.json
 
     - name: Deploy or Update AS3
       f5networks.f5_bigip.bigip_as3_deploy:
