@@ -1,0 +1,25 @@
+---
+- name: AS3
+  hosts: f5
+  connection: httpapi
+  gather_facts: false
+  collections:
+    - f5networks.f5_bigip
+
+  # Connection Info
+  vars:
+    ansible_host: 3.24.162.144
+    ansible_user: admin
+    ansible_httpapi_password: password
+    ansible_httpapi_port: 443
+    ansible_network_os: f5networks.f5_bigip.bigip
+    ansible_httpapi_use_ssl: yes
+    ansible_httpapi_validate_certs: no
+
+  tasks:
+
+    - name: Remove one tenant - AS3
+      bigip_as3_deploy:
+        tenant: Sample_01
+        state: absent
+
