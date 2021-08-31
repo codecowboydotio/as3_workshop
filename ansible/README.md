@@ -14,5 +14,5 @@ I have a terraform example here: (https://github.com/codecowboydotio/terraform/t
 Within thei section of the repo there are two directories:
 
 - simple_ansible: This is a simple example of deploying a static AS3 configuration to a BIG-IP.
-- paramter_ansile: This is the same simple example but shows how to use paramters to pass variables to the playbook
+- parameter_ansile: This is the same simple example but shows how to use paramters to pass variables to the playbook
 

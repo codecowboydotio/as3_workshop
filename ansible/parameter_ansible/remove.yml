@@ -1,0 +1,30 @@
+---
+- name: AS3
+  hosts: f5
+  connection: httpapi
+  gather_facts: false
+  collections:
+    - f5networks.f5_bigip
+
+  # Connection Info
+  vars:
+    ansible_host: x.x.x.x
+    ansible_user: admin
+    ansible_httpapi_password: password
+    ansible_httpapi_port: 443
+    ansible_network_os: f5networks.f5_bigip.bigip
+    ansible_httpapi_use_ssl: yes
+    ansible_httpapi_validate_certs: no
+
+  tasks:
+
+    - name: Check all vars are present
+      assert:
+        that:
+          - tenant != ""
+
+    - name: Remove one tenant - AS3
+      bigip_as3_deploy:
+        tenant: "{{ tenant }}"
+        state: absent
+
