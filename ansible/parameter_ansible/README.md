@@ -31,18 +31,30 @@ There are two playbooks here with a very simple use case:
     ansible_httpapi_use_ssl: yes
     ansible_httpapi_validate_certs: no
 
+    VIP_ADDRESS: 1.1.1.1
+
   tasks:
+
+    - name: Update AS3 template
+      template:
+        src: as3_simple.j2
+        dest: as3_simple.json
 
     - name: Deploy or Update AS3
       f5networks.f5_bigip.bigip_as3_deploy:
-          content: "{{ lookup('file', 'as3.json') }}"
+          content: "{{ lookup('file', 'as3_simple.json') }}"
       tags: [ deploy ]
 ```
 
-The playbook above adds the onfiguration that is found in my as2.json file to the BIG-IP that is configured in the variables section of the playbook.
+The playbook above does two things: 
+1. It creates an AS3 json declaration from a jinja2 template 
+2. It uploads that configuration to the BIG-IP.
 
-The task reads in a local file from disk. This file is the as3 declaration.
+The first task reads in variables from the command line - or uses the default variable VIP_ADDRESS and passes this to a jinja2 template.
+The second task reads in a local file from disk. This file is the as3 declaration.
 
+
+The jinja2 template is an AS3 declaration with the addition of a JINJA variable called VIP_ADDRESS
 ```
 {
      "class": "AS3",
@@ -63,7 +75,7 @@ The task reads in a local file from disk. This file is the as3 declaration.
              "MyAS3VIP": {
                  "class": "Service_HTTP",
                  "virtualAddresses": [
-                     "10.1.1.1"
+                     "{{ VIP_ADDRESS }}"
                  ],
                  "pool": "web_pool"
              },
@@ -88,11 +100,17 @@ The task reads in a local file from disk. This file is the as3 declaration.
 }
 ```
 
+The task fills out the variable and replaces it with the variable before sending the delcaration.
+This declaration could easily be extended to cater for multiple variables - this is an example of using a single variable.
+
+
 
 
 
 ### Removal of an AS3 configuration
-The removal playbook is similar in nature, in that it still has the variables to define the BIG-IP at the beginning.
+The removal playbook this time is similar, but the tenant name is passed in as a variable.
+
+There are two tasks in this playbook, the first simply checks that the tenant variable has been passed into the playbook - this is different from the add.yml playbook. This playbook does not add a default variable. I chose to show this simply to demonstrate that there are different ways to approach using variables in your playbooks.
 
 ```
 ---
@@ -115,9 +133,16 @@ The removal playbook is similar in nature, in that it still has the variables to
 
   tasks:
 
+    - name: Check all vars are present
+      assert:
+        that:
+          - tenant != ""
+        fail_msg: "'tenant' does not exist"
+        success_msg: "attempting to remove tenant: {{ tenant }}"
+
     - name: Remove one tenant - AS3
       bigip_as3_deploy:
-        tenant: Sample_01
+        tenant: "{{ tenant }}"
         state: absent
 ```
 
@@ -126,11 +151,11 @@ The main difference with this playbook is the task:
 ```
     - name: Remove one tenant - AS3
       bigip_as3_deploy:
-        tenant: Sample_01
+        tenant: "{{ tenant }}"
         state: absent
 ```
 
-The task simply references the tenant and uses the ansible "state" directive to declare the tenant as absent - this will remove the tenant.
+The tenant name is read in as a variable from the command line.
 
 ## Let's run this
 
@@ -141,21 +166,23 @@ On your ansible machine, clone this repository.
 ```
 git clone https://github.com/codecowboydotio/as3_workshop
 
-cd as3_workshop/ansible/simple_ansible
+cd as3_workshop/ansible/parameter_ansible
 
 ls -la
 
-drwxr-xr-x. 2 root root   75 Aug 31 15:06 .
-drwxr-xr-x. 3 root root   45 Aug 31 15:13 ..
--rw-r--r--. 1 root root  515 Aug 31 15:06 add.yml
--rw-r--r--. 1 root root 1166 Aug 31 08:54 as3_simple.json
--rw-r--r--. 1 root root   14 Aug 31 14:06 hosts
--rw-r--r--. 1 root root  503 Aug 31 14:19 remove.yml
+[root@ip-10-100-1-222 parameter_ansible]# ll
+total 28
+-rw-r--r--. 1 root root  652 Aug 31 05:57 add.yml
+-rw-r--r--. 1 root root 1175 Aug 31 05:57 as3_simple.j2
+-rw-r--r--. 1 root root   18 Aug 31 05:57 hosts
+-rw-r--r--. 1 root root 7930 Aug 31 05:57 README.md
+-rw-r--r--. 1 root root  710 Aug 31 05:57 remove.yml
+
 ```
 
 There are four files:
 - hosts: This is an ansible hosts file that is used to place the BIG-IP host(s) inside of
-- as3_simple.json: This is an AS3 declaration that creates a simple tenant, load balancing pool and members.
+- as3_simple.j2: This is a JINJA2 template that will be "filled out" at run time by the first task.
 - add.yml: This is an ansible playbook that will use the as3_simple.json file and add the tenant information to the BIG-IP
 - remove.yml: This is an ansible playbook to remove the tenant created by the "add.yml" playbook.
 
@@ -191,10 +218,10 @@ Change the variables in the playbook to reflect your environment.
 Once all of the changes have been made, you can run the add playbook like this:
 
 ```
+[root@ip-10-100-1-222 parameter_ansible]# more hosts
 [f5]
 13.54.144.60
-
-[root@ip-10-100-1-222 simple_ansible]# more add.yml
+[root@ip-10-100-1-222 parameter_ansible]# more add.yml
 ---
 - name: AS3
   hosts: f5
@@ -211,22 +238,32 @@ Once all of the changes have been made, you can run the add playbook like this:
     ansible_httpapi_use_ssl: yes
     ansible_httpapi_validate_certs: no
 
+    VIP_ADDRESS: 1.1.1.1
+
   tasks:
+
+    - name: Update AS3 template
+      template:
+        src: as3_simple.j2
+        dest: as3_simple.json
 
     - name: Deploy or Update AS3
       f5networks.f5_bigip.bigip_as3_deploy:
           content: "{{ lookup('file', 'as3_simple.json') }}"
       tags: [ deploy ]
 
-[root@ip-10-100-1-222 simple_ansible]# ansible-playbook add.yml -i hosts
+[root@ip-10-100-1-222 parameter_ansible]# ansible-playbook add.yml -i hosts -e VIP_ADDRESS=5.5.5.5
 
 PLAY [AS3] ************************************************************************************************************************
+
+TASK [Update AS3 template] ********************************************************************************************************
+ok: [13.54.144.60]
 
 TASK [Deploy or Update AS3] *******************************************************************************************************
 ok: [13.54.144.60]
 
 PLAY RECAP ************************************************************************************************************************
-13.54.144.60               : ok=1    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+13.54.144.60               : ok=2    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
 
 ```
 
@@ -235,42 +272,26 @@ You may now log into the BIG-IP and ensure that the tenant has been created succ
 
 
 
-SImilarly to remove the tenant that you have just created, you can run the following:
+Similarly to remove the tenant that you have just created, you can run the following:
+Note that the tenant name is passed in as a variable on the command line using the -e switch.
 
 ```
-[root@ip-10-100-1-222 simple_ansible]# more remove.yml
----
-- name: AS3
-  hosts: f5
-  connection: httpapi
-  gather_facts: false
-  collections:
-    - f5networks.f5_bigip
-
-  # Connection Info
-  vars:
-    ansible_host: 13.54.144.60
-    ansible_user: admin
-    ansible_httpapi_password: password
-    ansible_httpapi_port: 443
-    ansible_network_os: f5networks.f5_bigip.bigip
-    ansible_httpapi_use_ssl: yes
-    ansible_httpapi_validate_certs: no
-
-  tasks:
-
-    - name: Remove one tenant - AS3
-      bigip_as3_deploy:
-        tenant: Sample_01
-        state: absent
-
-[root@ip-10-100-1-222 simple_ansible]# ansible-playbook remove.yml -i hosts
+[root@ip-10-100-1-222 parameter_ansible]# ansible-playbook remove.yml -i hosts -e tenant=Sample_01
 
 PLAY [AS3] ************************************************************************************************************************
+
+TASK [Check all vars are present] *************************************************************************************************
+ok: [13.54.144.60] => {
+    "changed": false,
+    "msg": "attempting to remove tenant: Sample_01"
+}
 
 TASK [Remove one tenant - AS3] ****************************************************************************************************
 changed: [13.54.144.60]
 
 PLAY RECAP ************************************************************************************************************************
-13.54.144.60               : ok=1    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+13.54.144.60               : ok=2    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+
 ```
+
+
