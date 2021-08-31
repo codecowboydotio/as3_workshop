@@ -240,3 +240,43 @@ This has created a tenant on the BIG-IP.
 You may now log into the BIG-IP and ensure that the tenant has been created successfully.
 
 
+
+SImilarly to remove the tenant that you have just created, you can run the following:
+
+```
+[root@ip-10-100-1-222 simple_ansible]# more remove.yml
+---
+- name: AS3
+  hosts: f5
+  connection: httpapi
+  gather_facts: false
+  collections:
+    - f5networks.f5_bigip
+
+  # Connection Info
+  vars:
+    ansible_host: 13.54.144.60
+    ansible_user: admin
+    ansible_httpapi_password: password
+    ansible_httpapi_port: 443
+    ansible_network_os: f5networks.f5_bigip.bigip
+    ansible_httpapi_use_ssl: yes
+    ansible_httpapi_validate_certs: no
+
+  tasks:
+
+    - name: Remove one tenant - AS3
+      bigip_as3_deploy:
+        tenant: Sample_01
+        state: absent
+
+[root@ip-10-100-1-222 simple_ansible]# ansible-playbook remove.yml -i hosts
+
+PLAY [AS3] ************************************************************************************************************************
+
+TASK [Remove one tenant - AS3] ****************************************************************************************************
+changed: [13.54.144.60]
+
+PLAY RECAP ************************************************************************************************************************
+13.54.144.60               : ok=1    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+```
