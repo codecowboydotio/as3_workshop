@@ -1,0 +1,24 @@
+---
+- hosts: f5
+  gather_facts: false
+
+  vars:
+   user: "admin"
+   password: "admin"
+   bigip_port: "443"
+   http_method: "POST"
+   file_name: "as3_simple.json"
+   as3_spec: "{{ lookup('file', '{{ file_name }}') | from_json }}"
+
+  tasks:
+  - name: URI POST Tenant
+    uri:
+       url: "https://{{ inventory_hostname }}:{{ bigip_port }}/mgmt/shared/appsvcs/declare"
+       method: "{{ http_method }}"
+       user: "{{ user }}"
+       password: "{{ password }}"
+       force_basic_auth: yes
+       validate_certs: no
+       body: "{{ as3_spec }}"
+       body_format: json
+    delegate_to: localhost
