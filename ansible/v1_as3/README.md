@@ -109,7 +109,7 @@ Change the variable **http_method** from POST to DELETE
    user: "admin"
    password: "admin"
    bigip_port: "443"
-   **http_method: "DELETE"**
+   http_method: "DELETE"
 
 ```
 
