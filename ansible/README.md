@@ -14,6 +14,7 @@ I have a terraform example here: (https://github.com/codecowboydotio/terraform/t
 Within thei section of the repo there are two directories:
 
 - simple_ansible: This is a simple example of deploying a static AS3 configuration to a BIG-IP.
+- simple_ansible_vault: This is an example of using the simple axample but using vault to secure the password
 - parameter_ansile: This is the same simple example but shows how to use paramters to pass variables to the playbook
 - v1_as3: This is the same example, but shows how to use AS3 by only using the standard ansible URI module.
 
