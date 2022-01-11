@@ -1,0 +1,23 @@
+---
+- name: AS3
+  hosts: f5
+  connection: httpapi
+  gather_facts: false
+
+  # Connection Info
+  vars:
+    ansible_host: 10.1.1.245
+    ansible_user: admin
+    ansible_httpapi_password: admin
+    ansible_httpapi_port: 443
+    ansible_network_os: f5networks.f5_bigip.bigip
+    ansible_httpapi_use_ssl: yes
+    ansible_httpapi_validate_certs: no
+
+  tasks:
+
+    - name: Deploy or Update AS3
+      f5networks.f5_bigip.bigip_as3_deploy:
+          content: "{{ lookup('file', 'as3_simple.json') }}"
+      tags: [ deploy ]
+
